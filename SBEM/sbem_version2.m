@@ -4,8 +4,8 @@ d=1;    %天线间隔
 lambda=2;  %载波波长
 M=128; %天线数
 P=100; %路径数
-K=2;  %用户数
-z=pi/180;  %角度弧度变换系数
+K=32;  %用户数
+z=pi/180;  %角度转弧度
 theta_Option=[-48.59,-14.18,14.48,48.59].*z;
 theta_AS=2*z;
 theta=zeros(P,K);
@@ -45,7 +45,7 @@ end
 
 B_index=zeros(1,K);  %只记录第一个索引，索引集为[B_index~B_index+tau-1]
 h2=zeros(M,1,K);  %DFT & 旋转 后的h
-V=100; %扫描精度
+V=100;  %扫描精度
 tau=16;
 phi=pi/(V*M);
 PHI=zeros(M,M,K);
@@ -62,7 +62,7 @@ for k=1:K
 		end
 		h2(1:M,1,k)=F*PHI(1:M,1:M,k)*h(1:M,1,k);
 		for l=1:(M-tau+1)
-			h_percent=norm(h2(l:l+tau-1,1,k))/norm(h2(1:M,1,k));  %Attention：这里直接用的模值并没有算平方
+			h_percent=norm(h2(l:l+tau-1,1,k))/norm(h2(1:M,1,k));  %Attention拢潞脮芒脌茂脰卤陆脫脫脙碌脛脛拢脰碌虏垄脙禄脫脨脣茫脝陆路陆
 		    if h_percent>h_max
 		    	h_max=h_percent;
 		    	B_index(k)=l;
@@ -81,7 +81,7 @@ for k=1:K
 	h2(:,:,k)=F*PHI_final(:,:,k)*h(:,:,k);
 end
 
-%画图
+%%画图
 
 %{
 subplot(2,1,1);
@@ -103,3 +103,7 @@ for k=1:K
     title('with spatial rotation');
 end
 %}
+save tau;
+save h;
+save h2;
+save B_index;
