@@ -7,8 +7,9 @@ P=100; %路径数
 K=32;  %用户数
 z=pi/180;  %角度转弧度
 tau=16;
-theta_Option=[-48.59,-14.18,14.48,48.59].*z;
+theta_Option=[-48.59,-14.48,14.48,48.59].*z;
 theta_AS=2*z;
+
 theta=zeros(P,K);
 for i=1:K
 	index_matrix=randperm(4);
@@ -19,7 +20,7 @@ end
 F=zeros(M,M);
 for i=1:M
     for j=1:M
-        F(i,j)=exp(1i*(2*pi/M)*(i-1)*(j-1))/sqrt(M);
+        F(i,j)=exp(-1i*(2*pi/M)*(i-1)*(j-1))/sqrt(M);
     end
 end
 
