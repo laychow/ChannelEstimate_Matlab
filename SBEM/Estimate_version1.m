@@ -1,12 +1,14 @@
 %UL
-
-clear all;
-clc;
-%run('TrainingSequence.m');
-load('B_index.mat');
-load('tau.mat');
-load('sigma_p.mat');
-load('L.mat');
+% L=16;
+% sigma_p=1;
+% sigma_n=1;
+% rho=sigma_p/sigma_n;
+% 
+% run('TrainingSequence.m');
+% load('B_index.mat');
+% load('tau.mat');
+% load('sigma_p.mat');
+% load('L.mat');
 
 
 %分组
@@ -82,19 +84,20 @@ end
 
 %上行传输
 
-P_ut=rand(1,K);
+P_ut=L*rho;
 d_k=P_ut/(L*(sigma_p^2));
 
 %%得到BS端接收Y
 
 Y=zeros(M,L);
-N=randn(M,L) + 1i*randn(M,L);
+%sigma_n=5;           %sigma_n^2
+N=sqrt(sigma_n/2)*(randn(M,L) + 1i*randn(M,L));%s = sqrt(var/2)*(randn(1,K) +j*randn(1,K))
 
 for g=1:Group_number
 	Y_temp=zeros(M,1);
 	for k=1:K
 		if B_index_grouped(2,k)==g
-			Y_temp=Y_temp+d_k(k)*h(:,:,k);
+			Y_temp=Y_temp+sqrt(d_k)*h(:,:,k);
 		end
 	end
 	Y=Y+Y_temp*(S(:,g)');
@@ -106,19 +109,20 @@ Y=Y+N;
 y_g=zeros(M,1,Group_number);
 h_es_ul=zeros(M,1,K);
 h_es_ul_temp=zeros(M,1,K);
+h_es_ul_tempp=zeros(M,1,K);
 
 
 for g=1:Group_number
-	y_g(:,:,g)=(1/(L*(sigma_p)^2))*Y*S(:,g);
+	y_g(:,:,g)=(1/(L*(sigma_p)))*Y*S(:,g);
 end
 
 for g=1:Group_number
 	for k=1:K
 		if B_index_grouped(2,k)==g
-			h_es_ul_temp(:,:,k)=(1/sqrt(d_k(k))).*F*PHI_final(:,:,k)*y_g(:,:,g);
+			h_es_ul_temp(:,:,k)=(1/sqrt(d_k))*F*PHI_final(:,:,k)*y_g(:,:,g);
 			index_t=B_index_grouped(1,k);
-			h_es_ul(index_t:index_t+tau-1,:,k)=h_es_ul_temp(index_t:index_t+tau-1,:,k);
-			h_es_ul(:,:,k)=(PHI_final(:,:,k)')*(F')*h_es_ul(:,:,k);
+			h_es_ul_tempp(index_t:index_t+tau-1,:,k)=h_es_ul_temp(index_t:index_t+tau-1,:,k);
+			h_es_ul(:,:,k)=(PHI_final(:,:,k)')*(F')*h_es_ul_tempp(:,:,k);
 		end
 	end
 end
