@@ -11,20 +11,20 @@
 % load('L.mat');
 
 
-%·Ö×é
+%åˆ†ç»„
 
 OMEGA=tau/4;
 
 
-%%³õÊ¼»¯
-B_index_grouped=zeros(3,K);%µÚÒ»ĞĞÎª¼¯ºÏBµÄµÚÒ»¸öË÷Òı£»µÚ¶şĞĞÎªÆäËùÔÚ×éÊı£»µÚÈıĞĞÎªÔ­Ê¼ÓÃ»§ºÅ
+%%åˆå§‹åŒ–
+B_index_grouped=zeros(3,K);%ç¬¬ä¸€è¡Œä¸ºé›†åˆBçš„ç¬¬ä¸€ä¸ªç´¢å¼•ï¼›ç¬¬äºŒè¡Œä¸ºå…¶æ‰€åœ¨ç»„æ•°ï¼›ç¬¬ä¸‰è¡Œä¸ºåŸå§‹ç”¨æˆ·å·
 B_index_grouped(1,1:K)=B_index; 
 B_index_grouped(2,1:K)=0; 
 for i=1:K
-	B_index_grouped(3,i)=i;  %¼ÇÏÂÔ­Ê¼µÄÓÃ»§ºÅ
+	B_index_grouped(3,i)=i;  %è®°ä¸‹åŸå§‹çš„ç”¨æˆ·å·
 end
 
-%%Ë÷ÒıÅÅĞò
+%%ç´¢å¼•æ’åº
 for i=1:K
 	for j=i+1:K
 		if B_index_grouped(1,i)>B_index_grouped(1,j)
@@ -35,7 +35,7 @@ for i=1:K
 	end
 end
 
-%%·Ö×é
+%%åˆ†ç»„
 for g=1:K
     for k_s=g:K
     	if k_s==1 
@@ -63,7 +63,7 @@ for g=1:K
     end
 end
 
-%%»¹Ô­Ë³Ğò
+%%è¿˜åŸé¡ºåº
 for i=1:K
 	for j=i+1:K
 		if B_index_grouped(3,i)>B_index_grouped(3,j)
@@ -74,7 +74,7 @@ for i=1:K
 	end
 end
 
-%%µÃ³ö×éÊı
+%%å¾—å‡ºç»„æ•°
 Group_number=0;
 for k=1:K
 	if B_index_grouped(2,k)>Group_number
@@ -82,12 +82,12 @@ for k=1:K
 	end
 end
 
-%ÉÏĞĞ´«Êä
+%ä¸Šè¡Œä¼ è¾“
 
-P_ut=L*rho;
-d_k=P_ut/(L*(sigma_p^2));
+%P_ut=L*rho;
+%d_k=P_ut/(L*(sigma_p^2));
 
-%%µÃµ½BS¶Ë½ÓÊÕY
+%%å¾—åˆ°BSç«¯æ¥æ”¶Y
 
 Y=zeros(M,L);
 %sigma_n=5;           %sigma_n^2
@@ -104,7 +104,7 @@ for g=1:Group_number
 end
 Y=Y+N;
 
-%%ULĞÅµÀ¹À¼Æ
+%%ULä¿¡é“ä¼°è®¡
 
 y_g=zeros(M,1,Group_number);
 h_es_ul=zeros(M,1,K);
