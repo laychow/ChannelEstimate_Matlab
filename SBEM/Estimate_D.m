@@ -1,202 +1,162 @@
 function MSE=Estimate_D(L,sigma_p)
 
 load ('a_theta.mat');
-load ('B_index_grouped.mat');
-load ('S.mat')
+load ('B_index.mat');
+load ('S.mat');
+load ('PHI_final.mat');
+
 d=1;    %天线间隔
 lambda=2;  %载波波长
 M=128; %天线数
 P=100; %路径数
 K=32;  %用户数
-z=pi/180;  %角度转弧度
-L=64;
 
-%tau=16;
-G=K/tau;
-theta_Option=[-48.59,-14.48,14.48,48.59].*z;
-theta_AS=AS*2*z;
-sigma_p=100;
+tau=16;
+%sigma_p=100;
 sigma_n=1;
 rho=sigma_p/sigma_n;
+P_dt=L*rho;
+S_k=sqrt(P_dt/(tau*L*sigma_p))*(S');
 
-
-% theta=zeros(P,K);
-% for i=1:K
-% 	index_matrix=randperm(4);
-%     theta_low=theta_Option(index_matrix(1))-theta_AS;
-%     theta_up=theta_Option(index_matrix(1))+theta_AS;
-% 	theta(1:P,i)=unifrnd(theta_low,theta_up,P,1);
-% end
-% F=zeros(M,M);
-% for i=1:M
-%     for j=1:M
-%         F(i,j)=exp(-1i*(2*pi/M)*(i-1)*(j-1))/sqrt(M);
-%     end
-% end
-% 
-% a_theta=zeros(P,M,K);
-% for k=1:K
-% 	for i=1:P
-% 		for j=1:M
-% 			a_theta(i,j,k)=exp(1i*(2*pi*d/lambda)*(j-1)*sin(theta(i,k)));
-% 		end
-% 	end
-% end
 
 %生成DL信道h
 
 b_kp=sqrt(1/2)*(randn(K,P) + 1i*randn(K,P)); %信道复增益
-h=zeros(M,1,K);
+h_dl=zeros(M,1,K);
 
 for k=1:K
-	h(1:M,1,k)=(1/sqrt(P))*([b_kp(k,:)*a_theta(1:P,1:M,k)].');%%%%%%%
+	h_dl(1:M,1,k)=(1/sqrt(P))*([b_kp(k,:)*a_theta(1:P,1:M,k)].');%%%%%%%
 	
 end
-save h;
+save h_dl;
 
+
+%分组
+%%相同的index先分到一个cluster里
 %{
-S=zeros(L,tau);
-Ss_temp=rand(L,L);
-S_temp=orth(Ss_temp);
-S=S_temp(:,1:tau).*sqrt(L*sigma_p);
-
-
-%run ('TrainingSequence.m');
-
-h_es_pre=zeros(M,1,K);
-
-%preamble 鐢熸垚Y
-
-Y_pre=zeros(M,L,G);
-P_ut=L*rho;
-d_k=P_ut/(L*(sigma_p));
-%N=sqrt(sigma_n/2)*(randn(M,L) + 1i*randn(M,L));%s = sqrt(var/2)*(randn(1,K) +j*randn(1,K))
-
-
-for g=1:G
-	for t=1:tau
-		Y_tem=sqrt(d_k)*h(:,:,t+(g-1)*tau)*(S(:,t)');
-		Y_pre(:,:,g)=Y_pre(:,:,g)+Y_tem;
-	end
-	Y_pre(:,:,g)=Y_pre(:,:,g)+sqrt(sigma_n/2)*(randn(M,L) + 1i*randn(M,L));
-end
-
-
-
-for g=1:G
-	for t=1:tau
-		h_es_pre(:,:,t+(g-1)*tau)=(1/(sqrt(d_k)*(L*sigma_p)))*Y_pre(:,:,g)*S(:,t);
-	end
-end
-
-%鑾峰緱绌洪棿淇℃伅
-
-B_index=zeros(1,K);  %鍙褰曡捣濮嬬储寮昜B_index~B_index+tau-1]
-h2=zeros(M,1,K);  %DFT 鍚庣殑h
-V=100;  %?篓?猫????
-%tau=16;
-phi=2*pi/(V*M);
-PHI=zeros(M,M,K);
-phi_final=zeros(1,K);
-PHI_final=zeros(M,M,K);
-
-for k=1:K
-	H_max=0;
-	h_max=0;
-	h_percent=0;
-	for j=1:V
-		for i=1:M
-			PHI(i,i,k)=exp(1i*(i-1)*(phi*j+-pi/M));
-		end
-		h2(1:M,1,k)=F*PHI(1:M,1:M,k)*h_es_pre(1:M,1,k);
-		for l=1:(M-tau+1)
-			h_percent=norm(h2(l:l+tau-1,1,k))/norm(h2(1:M,1,k));  %Attention
-		    %h_percent=norm(h2(l:l+tau-1,1,k));
-            if h_percent>h_max
-		    	h_max=h_percent;
-		    	B_index(k)=l;
-		    end
-		end
-		if h_max>H_max
-			H_max=h_max;
-			phi_final(k)=(phi*j+-pi/M);
-		end
-	end
-	for i=1:M
-		PHI_final(i,i,k)=exp(1i*(i-1)*phi_final(k));
-	end
-end
-for k=1:K
-    h1(:,:,k)=F*h_es_pre(:,:,k);
-	h2(:,:,k)=F*PHI_final(:,:,k)*h_es_pre(:,:,k);
-end
-
-
-
-OMEGA=tau/4;    %缁勪箣闂存渶灏忛棿闅?
-
-
-%%鍒嗙粍
-B_index_grouped=zeros(3,K);%绗竴琛岃〃绀虹储寮曪紝绗簩琛岃〃绀虹粍鍙凤紝绗笁琛岃〃绀虹敤鎴峰彿
-B_index_grouped(1,1:K)=B_index; 
-B_index_grouped(2,1:K)=0; 
+B_index_cluster=zeros(4,K);%第一行是索引；第二行是cluster号；第三行是组号；第四行是用户号
+B_index_cluster(1,:)=B_index;
 for i=1:K
-	B_index_grouped(3,i)=i; 
+        B_index_cluster(4,i)=i; 
 end
-
 
 for i=1:K
-	for j=i+1:K
-		if B_index_grouped(1,i)>B_index_grouped(1,j)
-			temp=B_index_grouped(:,i);
-			B_index_grouped(:,i)=B_index_grouped(:,j);
-			B_index_grouped(:,j)=temp;
+    for j=i+1:K
+        if B_index_cluster(1,i)>B_index_cluster(1,j)
+            temp=B_index_cluster(:,i);
+            B_index_cluster(:,i)=B_index_cluster(:,j);
+            B_index_cluster(:,j)=temp;
+        end
+    end
+end
+
+mark=0;
+for g=1:K
+	for k_g=g:K
+		if(B_index_cluster(2,k_g)==0)
+			B_index_cluster(2,k_g)=g;
+			mark=k_g;
+			break;
+        end
+    end
+	for k_g=(mark+1):K
+		if(B_index_cluster(1,k_g)==B_index_cluster(1,k_g-1))
+			B_index_cluster(2,k_g)=g;
+		else 
+			break;
 		end
-	end
+    end
+    if(B_index_cluster(2,K)~=0)
+        break;
+    end
+end
+%}
+B_index_clu_grouped=zeros(3,K);%第一行是索引；第二行是组号；第三行是用户号
+B_index_clu_grouped(1,:)=B_index;
+for i=1:K
+    B_index_clu_grouped(3,i)=i; 
+end
+mark=0;
+
+for i=1:K
+    for j=i+1:K
+        if B_index_clu_grouped(1,i)>B_index_clu_grouped(1,j)
+            temp=B_index_clu_grouped(:,i);
+            B_index_clu_grouped(:,i)=B_index_clu_grouped(:,j);
+            B_index_clu_grouped(:,j)=temp;
+        end
+    end
 end
 
 
 for g=1:K
-    for k_s=g:K
-    	if k_s==1 
-    		B_index_grouped(2,k_s)=1;
-            k=1;
-    		break;
-        
-        elseif (B_index_grouped(2,k_s)~=(g-1))&&(B_index_grouped(2,k_s)==0)
-            B_index_grouped(2,k_s)=g;
-    		k=k_s;
-    		break;
-    	end
-    end
-    a=1;
-    while k+a<=K
-        if B_index_grouped(2,k+a)~=g
-        	if (B_index_grouped(1,k+a)-B_index_grouped(1,k))>=(tau+OMEGA-1)&&(B_index_grouped(2,k+a)==0)
-                B_index_grouped(2,k+a)=g;
-                k=k+a;
-                a=1;
-            else a=a+1;
-            end
-        else a=a+1;
+	for k_g=g:K
+		if(B_index_clu_grouped(2,k_g)==0)
+			B_index_clu_grouped(2,k_g)=g;
+			mark=k_g;
+			break;
         end
     end
-end
- 
+    a=1;
+    while mark+a<=K
+    	if (B_index_clu_grouped(2,mark+a)==0)&&(B_index_clu_grouped(2,mark+a)~=g)
+	    	if (B_index_clu_grouped(1,mark+a)==B_index_clu_grouped(1,mark))||((B_index_clu_grouped(1,mark+a)-B_index_clu_grouped(1,mark))>=(tau+OMEGA-1))
+	    		B_index_clu_grouped(2,mark+a)=g;
+	    		mark=mark+a;
+	    		a=1;
 
-for i=1:K
-	for j=i+1:K
-		if B_index_grouped(3,i)>B_index_grouped(3,j)
-			temp=B_index_grouped(:,i);
-			B_index_grouped(:,i)=B_index_grouped(:,j);
-			B_index_grouped(:,j)=temp;
-		end
+	    	else 
+	    		a=a+1;
+            end
+        else a=a+1;
+	    end
 	end
 end
 
-%}
- Group_number=max(B_index_grouped(2,:));
+for i=1:K
+    for j=i+1:K
+        if B_index_clu_grouped(3,i)>B_index_clu_grouped(3,j)
+            temp=B_index_clu_grouped(:,i);
+            B_index_clu_grouped(:,i)=B_index_clu_grouped(:,j);
+            B_index_clu_grouped(:,j)=temp;
+        end
+    end
+end
+Group_clu_number=max(B_index_clu_grouped(2,:));
 
 
 
-%obtain 
+
+%obtain y at MS
+
+y_dl=zeros(L,1,K);
+for i=1:K
+	g=B_index_clu_grouped(2,i);
+	Y_temp=zeros(1,L);
+	for k=1:K
+		if B_index_clu_grouped(2:k)==g
+			index_d=B_index_clu_grouped(1,k);
+			Y_temp=Y_temp+((F(index_d:index_d+tau-1,:)*PHI_final(:,:,k)*h_dl(:,:,i))')*S_k;
+		end
+	end
+	y_dl(:,:,i)=(Y_temp+sqrt(sigma_n/2)*(randn(1,L) + 1i*randn(1,L)))';
+end
+
+
+%估计dl
+h_es_dl=zeros(M,1,K);
+for k=1:K
+	index_d=B_index_clu_grouped(1,k);
+	F_TEMP=F';
+	S_TEMP=pinv(S_k');
+	h_es_dl(:,:,k)=(PHI_final(:,:,k))'*F_TEMP(1:M,index_d:index_d+tau-1)*S_TEMP*y_dl(:,:,k);
+end
+
+MSE=0;
+MSE_temp=0;
+for k=1:K
+        MSE_temp=((norm(h_dl(:,:,k)-h_es_dl(:,:,k)))^2)/(norm(h_dl(:,:,k)))^2;
+        MSE=MSE+MSE_temp;
+    end
+MSE=MSE/K;
+	
