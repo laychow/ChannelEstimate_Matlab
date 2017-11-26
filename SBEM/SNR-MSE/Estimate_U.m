@@ -263,6 +263,8 @@ end
 save h_es_ul.mat h_es_ul;
 save h_es_ul_temp.mat h_es_ul_temp;
 save h_es_ul_tempp.mat h_es_ul_tempp;
+save B_index_grouped.mat B_index_grouped;
+save Group_number.mat Group_number;
 
 MSE=0;
 MSE_temp=0;

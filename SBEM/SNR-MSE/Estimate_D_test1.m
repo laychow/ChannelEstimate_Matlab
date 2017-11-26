@@ -1,6 +1,6 @@
-%在MS端获得的y不包含与自己相同索引的用户参与累加
+%拥有重复项的用户不计入MSE中
 
-function MSE=Estimate_D(L,sigma_p)
+function MSE=Estimate_D_test1(L,sigma_p)
 
 load ('a_theta.mat');
 load ('B_index.mat');
@@ -156,10 +156,7 @@ for i=1:K
 	Y_temp=zeros(1,L);
 %     Y_tempp=zeros(1,M);
 	for k=1:K
-        if k==i
-            index_d=B_index_clu_grouped(1,k);
-            Y_temp=Y_temp+((F(index_d:index_d+tau-1,:)*PHI_final(:,:,k)*h_dl(:,:,i))')*S_k;
-        elseif (B_index_clu_grouped(2,k)==g)&&(B_index_clu_grouped(1,k)~=B_index_clu_grouped(1,i))
+        if (B_index_clu_grouped(2,k)==g)
 			index_d=B_index_clu_grouped(1,k);
 %             Y_tempp=(F*PHI_final(:,:,k)*h_dl(:,:,k))';
 %             Y_temp=Y_temp+Y_tempp(:,index_d:index_d+tau-1)*S_k;
@@ -194,9 +191,13 @@ save h_es_dl.mat h_es_dl;
 
 MSE=0;
 MSE_temp=0;
+number=0;
 for k=1:K
+    if repeat_index(k)==1
         MSE_temp=((norm(h_dl(:,:,k)-h_es_dl(:,:,k)))^2)/(norm(h_dl(:,:,k)))^2;
         MSE=MSE+MSE_temp;
+        number=number+1;
     end
-MSE=MSE/K;
+end
+MSE=MSE/number;
 	

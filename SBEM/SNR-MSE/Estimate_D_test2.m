@@ -1,13 +1,12 @@
-%在MS端获得的y不包含与自己相同索引的用户参与累加
-
-function MSE=Estimate_D(L,sigma_p)
+%按照上行的分组方法
+function MSE=Estimate_D_test2(L,sigma_p)
 
 load ('a_theta.mat');
 load ('B_index.mat');
 %load ('S.mat');
 load ('PHI_final.mat');
 load ('F.mat');
-
+load ('B_index_grouped')
 d=1;    %天线间隔
 lambda=2;  %载波波长
 M=128; %天线数
@@ -80,6 +79,7 @@ for g=1:K
     end
 end
 %}
+%{
 B_index_clu_grouped=zeros(3,K);%第一行是索引；第二行是组号；第三行是用户号
 B_index_clu_grouped(1,:)=B_index;
 for i=1:K
@@ -146,21 +146,19 @@ for k=1:K
 	repeat_index(k)=num;
 end
 save repeat_index.mat repeat_index;
+%}
 
 
 %obtain y at MS
 
 y_dl=zeros(L,1,K);
 for i=1:K
-	g=B_index_clu_grouped(2,i);
+	g=B_index_grouped(2,i);
 	Y_temp=zeros(1,L);
 %     Y_tempp=zeros(1,M);
 	for k=1:K
-        if k==i
-            index_d=B_index_clu_grouped(1,k);
-            Y_temp=Y_temp+((F(index_d:index_d+tau-1,:)*PHI_final(:,:,k)*h_dl(:,:,i))')*S_k;
-        elseif (B_index_clu_grouped(2,k)==g)&&(B_index_clu_grouped(1,k)~=B_index_clu_grouped(1,i))
-			index_d=B_index_clu_grouped(1,k);
+        if (B_index_grouped(2,k)==g)
+			index_d=B_index_grouped(1,k);
 %             Y_tempp=(F*PHI_final(:,:,k)*h_dl(:,:,k))';
 %             Y_temp=Y_temp+Y_tempp(:,index_d:index_d+tau-1)*S_k;
             
@@ -178,7 +176,7 @@ h_es_dl_temp=zeros(tau,1,K);
 h_es_dl_tempp=zeros(M,1,K);
 S_TEMP=pinv(S_k');
 for k=1:K
-	index_d=B_index_clu_grouped(1,k);
+	index_d=B_index_grouped(1,k);
     h_es_dl_temp(:,:,k)=S_TEMP*y_dl(:,:,k);
 	h_es_dl_tempp(index_d:index_d+tau-1,:,k)=h_es_dl_temp(:,:,k);
 	h_es_dl(:,:,k)=(PHI_final(:,:,k)')*(F')*h_es_dl_tempp(:,:,k);
@@ -194,9 +192,10 @@ save h_es_dl.mat h_es_dl;
 
 MSE=0;
 MSE_temp=0;
+
 for k=1:K
-        MSE_temp=((norm(h_dl(:,:,k)-h_es_dl(:,:,k)))^2)/(norm(h_dl(:,:,k)))^2;
-        MSE=MSE+MSE_temp;
-    end
+     MSE_temp=((norm(h_dl(:,:,k)-h_es_dl(:,:,k)))^2)/(norm(h_dl(:,:,k)))^2;
+     MSE=MSE+MSE_temp;
+end
 MSE=MSE/K;
 	
