@@ -223,7 +223,7 @@ else
      %%ÔÚBS¶Ë»ñµÃY
     Y=zeros(M,L);
 
-
+save 
     for g=1:Group_number
         Y_temp=zeros(M,1);
         for k=1:K
