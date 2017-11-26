@@ -2,104 +2,88 @@ clear all;
 clc;
 
 %SNR-MSE
+%%dl
+
 
 snr=-10:5:25;
-res=zeros(1,length(snr));
+res_ul=zeros(1,length(snr));
+res_dl=zeros(1,length(snr));
 for i=1:length(snr)
-    sum=0;
-    for j=1:10   %10times for average
-        sum=sum+Estimate_U(16,10^(snr(i)/10));
+    sum_ul=0;
+    sum_dl=0;
+    for j=1:1   %10times for average
+        sum_ul=sum_ul+Estimate_U(16,10^(snr(i)/10));
+        sum_dl=sum_dl+Estimate_D(16,10^(snr(i)/10));
     end
-    sum=sum/10;
-    res(i)=sum;
+    sum_ul=sum_ul/1;
+    sum_dl=sum_dl/1;
+    res_ul(i)=sum_ul;
+   res_dl(i)=sum_dl;
 end
-semilogy(snr,res,'-o');
-grid on;
+semilogy(snr,res_ul,'-o');
 hold on;
+semilogy(snr,res_dl,'-s');
 
+grid on;
+
+%DL
+%{  
 snr=-10:5:25;
 res=zeros(1,length(snr));
 for i=1:length(snr)
     sum=0;
-    for j=1:10    %10times for average
-        sum=sum+Estimate_U(32,10^(snr(i)/10));
+    for j=1:1    %10times for average
+        sum=sum+Estimate_D(16,10^(snr(i)/10));
     end
-    sum=sum/10;
+    sum=sum/1;
     res(i)=sum;
 end
 semilogy(snr,res,'-s');
-grid on;
-hold on;
-
-
-snr=-10:5:25;
-res=zeros(1,length(snr));
-for i=1:length(snr)
-    sum=0;
-    for j=1:10    %10times for average
-        sum=sum+Estimate_U(64,10^(snr(i)/10));
-    end
-    sum=sum/10;
-    res(i)=sum;
-end
-semilogy(snr,res,'-h');
-grid on;
-hold on;
-
+%}
 
 %AS-MSE
 %{
-theta_AS=4:2:32;
+theta_AS=4:4:32;
 res=zeros(1,length(theta_AS));
 for i=1:length(theta_AS)
 	sum=0;
-	for j=1:20
+	for j=1:1
 		sum=sum+Estimate_U(16,theta_AS(i));
 	end
-	sum=sum/20;
+	sum=sum/1;
 	res(i)=sum;
 end
-
 semilogy(theta_AS,res,'-^');
-set(gca,'XTickLabel',[4:4:32]);
-grid on;
 hold on;
 
-theta_AS=4:2:32;
+theta_AS=4:4:32;
 res=zeros(1,length(theta_AS));
 for i=1:length(theta_AS)
 	sum=0;
-	for j=1:20
+	for j=1:10
 		sum=sum+Estimate_U(24,theta_AS(i));
 	end
-	sum=sum/20;
+	sum=sum/10;
 	res(i)=sum;
 end
-
 semilogy(theta_AS,res,'-*');
-set(gca,'XTick',[4:4:32]);
-grid on;
 hold on;
 
-theta_AS=4:2:32;
+theta_AS=4:4:32;
 res=zeros(1,length(theta_AS));
 for i=1:length(theta_AS)
 	sum=0;
-	for j=1:50
+	for j=1:1
 		sum=sum+Estimate_U(32,theta_AS(i));
 	end
-	sum=sum/50;
+	sum=sum/1;
 	res(i)=sum;
 end
-
-
 semilogy(theta_AS,res,'-s');
-set(gca,'xticklabel',[4:4:32]);
-grid on;
 hold on;
 legend('\tau =16','\tau =24','\tau =32');
-
 %}
+
 %{
 +          ¼ÓºÅ
 o          Ô²È¦
