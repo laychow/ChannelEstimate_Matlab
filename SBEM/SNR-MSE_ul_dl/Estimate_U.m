@@ -1,4 +1,4 @@
-function MSE=Estimate_U(L,sigma_p)
+function MSE=Estimate_Utest(L,sigma_p)
 d=1;    %天线间隔
 lambda=2;  %载波波长 
 M=128; %天线数
@@ -19,8 +19,8 @@ theta=zeros(P,K);
 index_matrix=zeros(4,K);
 for i=1:K
 	index_matrix(:,i)=randperm(4);
-    theta_low=theta_Option(index_matrix(1,i))-theta_AS;
-    theta_up=theta_Option(index_matrix(1,i))+theta_AS;
+    theta_low=theta_Option(index_matrix(1,i))-theta_AS/2;
+    theta_up=theta_Option(index_matrix(1,i))+theta_AS/2;
 	theta(1:P,i)=unifrnd(theta_low,theta_up,P,1);
 end
 F=zeros(M,M);
@@ -197,14 +197,106 @@ if tau~=32
         end
     end
     Group_number=max(B_index_grouped(2,:));
-end
+
+
+    if Group_number>tau
+        Reuse=ceil(Group_number/tau);
+        Y=zeros(M,L,Reuse);
+        count=0;
+        for r=1:Reuse
+
+            for g=(1+(r-1)*tau):(tau+(r-1)*tau)
+                Y_temp=zeros(M,1);
+                for k=1:K
+                    if B_index_grouped(2,k)==g
+                        Y_temp=Y_temp+sqrt(d_k)*h_ul(:,:,k);
+                    end
+                end
+                Y(:,:,r)=Y(:,:,r)+Y_temp*(S(:,(g-(r-1)*tau))');
+                count=count+1;
+                if count>Group_number
+                    break;
+                end
+            end
+            
+        end
+        
+        
+        %UL估计
+        y_g=zeros(M,1,Group_number);
+        h_es_ul_temp=zeros(M,1,K);
+        h_es_ul_tempp=zeros(M,1,K);
+        count=0;
+        for r=1:Reuse
+            
+            for g=(1+(r-1)*tau):(tau+(r-1)*tau)
+              y_g(:,:,g)=(1/(L*sigma_p))*Y(:,:,r)*S(:,(g-(r-1)*tau));
+              count=count+1;
+              if count>Group_number
+                  break;
+              end
+
+            end
+          
+        end
+        
+        for g=1:Group_number
+            for k=1:K
+                if B_index_grouped(2,k)==g
+                     h_es_ul_temp(:,:,k)=(1/sqrt(d_k))*F*PHI_final(:,:,k)*y_g(:,:,g);
+                     index_t=B_index_grouped(1,k);
+                     h_es_ul_tempp(index_t:index_t+tau-1,:,k)=h_es_ul_temp(index_t:index_t+tau-1,:,k);
+                     h_es_ul(:,:,k)=(PHI_final(:,:,k)')*(F')*h_es_ul_tempp(:,:,k);
+ 
+                end
+            end
+        end
+        
+    else
+        Y=zeros(M,L);
+
+
+        for g=1:Group_number
+            Y_temp=zeros(M,1);
+            for k=1:K
+                if B_index_grouped(2,k)==g
+                    Y_temp=Y_temp+sqrt(d_k)*h_ul(:,:,k);
+                end
+            end
+            Y=Y+Y_temp*(S(1:L,g)');%%%%%可能分组之后的总组数比tau大，就会报错
+        end
+        Y=Y+sqrt(sigma_n/2)*(randn(M,L) + 1i*randn(M,L));
+
+        %%UL估计
+
+        y_g=zeros(M,1,Group_number);
+        h_es_ul=zeros(M,1,K);
+        h_es_ul_temp=zeros(M,1,K);
+        h_es_ul_tempp=zeros(M,1,K);
+
+
+        for g=1:Group_number
+            y_g(:,:,g)=(1/(L*sigma_p))*Y*S(:,g);
+        end
+
+        for g=1:Group_number
+            for k=1:K
+                if B_index_grouped(2,k)==g
+                     h_es_ul_temp(:,:,k)=(1/sqrt(d_k))*F*PHI_final(:,:,k)*y_g(:,:,g);
+                     index_t=B_index_grouped(1,k);
+                     h_es_ul_tempp(index_t:index_t+tau-1,:,k)=h_es_ul_temp(index_t:index_t+tau-1,:,k);
+                     h_es_ul(:,:,k)=(PHI_final(:,:,k)')*(F')*h_es_ul_tempp(:,:,k);
+ 
+                end
+            end
+        end
+        
+    end
+    
 
 
 
-
-
-
-if tau==32
+else
     %%在BS端获得Y
     Y=zeros(M,L);
     for k=1:K
@@ -219,46 +311,8 @@ if tau==32
         h_es_ul(:,:,k)=(1/(sqrt(d_k)*(L*sigma_p)))*Y*S(:,k);
     end
         
-else
-     %%在BS端获得Y
-    Y=zeros(M,L);
 
-save 
-    for g=1:Group_number
-        Y_temp=zeros(M,1);
-        for k=1:K
-            if B_index_grouped(2,k)==g
-                Y_temp=Y_temp+sqrt(d_k)*h_ul(:,:,k);
-            end
-        end
-        Y=Y+Y_temp*(S(:,g)');
-    end
-    Y=Y+sqrt(sigma_n/2)*(randn(M,L) + 1i*randn(M,L));
-
-    %%UL估计
-
-    y_g=zeros(M,1,Group_number);
-    h_es_ul=zeros(M,1,K);
-    h_es_ul_temp=zeros(M,1,K);
-    h_es_ul_tempp=zeros(M,1,K);
-
-
-    for g=1:Group_number
-        y_g(:,:,g)=(1/(L*sigma_p))*Y*S(:,g);
-    end
-
-    for g=1:Group_number
-        for k=1:K
-            if B_index_grouped(2,k)==g
-                 h_es_ul_temp(:,:,k)=(1/sqrt(d_k))*F*PHI_final(:,:,k)*y_g(:,:,g);
-                 index_t=B_index_grouped(1,k);
-                 h_es_ul_tempp(index_t:index_t+tau-1,:,k)=h_es_ul_temp(index_t:index_t+tau-1,:,k);
-                 h_es_ul(:,:,k)=(PHI_final(:,:,k)')*(F')*h_es_ul_tempp(:,:,k);
-%                    F1=F';
-%                   h_es_ul(:,:,k)=(1/sqrt(d_k))*(PHI_final(:,:,k)')*(F1(:,index_t:index_t+tau-1))*F(index_t:index_t+tau-1,:)*y_g(:,:,g);
-            end
-        end
-    end
+    
 end
 save h_es_ul.mat h_es_ul;
 save h_es_ul_temp.mat h_es_ul_temp;
@@ -278,7 +332,6 @@ save a_theta.mat a_theta;
 save B_index.mat B_index;
 save PHI_final.mat PHI_final;
 save F.mat F;
-
 
 
 

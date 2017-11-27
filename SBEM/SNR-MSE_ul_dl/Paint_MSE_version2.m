@@ -8,7 +8,7 @@ res=zeros(1,length(snr));
 for i=1:length(snr)
     sum=0;
     for j=1:1    %10times for average
-        sum=sum+Estimate_U(16,10^(snr(i)/10));
+        sum=sum+Estimate_Utest(16,10^(snr(i)/10));
     end
     sum=sum/1;
     res(i)=sum;
@@ -21,10 +21,10 @@ snr=-10:5:25;
 res=zeros(1,length(snr));
 for i=1:length(snr)
     sum=0;
-    for j=1:10    %10times for average
-        sum=sum+Estimate_U(32,10^(snr(i)/10));
+    for j=1:1    %10times for average
+        sum=sum+Estimate_Utest(32,10^(snr(i)/10));
     end
-    sum=sum/10;
+    sum=sum/1;
     res(i)=sum;
 end
 semilogy(snr,res,'-^');
@@ -36,10 +36,10 @@ snr=-10:5:25;
 res=zeros(1,length(snr));
 for i=1:length(snr)
     sum=0;
-    for j=1:10    %10times for average
-        sum=sum+Estimate_U(64,10^(snr(i)/10));
+    for j=1:1    %10times for average
+        sum=sum+Estimate_Utest(64,10^(snr(i)/10));
     end
-    sum=sum/10;
+    sum=sum/1;
     res(i)=sum;
 end
 semilogy(snr,res,'-s');
@@ -52,10 +52,10 @@ snr=-10:5:25;
 res=zeros(1,length(snr));
 for i=1:length(snr)
     sum=0;
-    for j=1:10    %10times for average
+    for j=1:1    %10times for average
         sum=sum+Estimate_D(16,10^(snr(i)/10));
     end
-    sum=sum/10;
+    sum=sum/1;
     res(i)=sum;
 end
 semilogy(snr,res,'--o');
@@ -66,10 +66,10 @@ snr=-10:5:25;
 res=zeros(1,length(snr));
 for i=1:length(snr)
     sum=0;
-    for j=1:10    %10times for average
+    for j=1:1    %10times for average
         sum=sum+Estimate_D(32,10^(snr(i)/10));
     end
-    sum=sum/10;
+    sum=sum/1;
     res(i)=sum;
 end
 semilogy(snr,res,'--^');
@@ -81,10 +81,10 @@ snr=-10:5:25;
 res=zeros(1,length(snr));
 for i=1:length(snr)
     sum=0;
-    for j=1:10    %10times for average
+    for j=1:1    %10times for average
         sum=sum+Estimate_D(64,10^(snr(i)/10));
     end
-    sum=sum/10;
+    sum=sum/1;
     res(i)=sum;
 end
 semilogy(snr,res,'--s');
