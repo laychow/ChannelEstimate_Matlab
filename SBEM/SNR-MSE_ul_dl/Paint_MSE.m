@@ -18,7 +18,7 @@ for i=1:length(snr)
     sum_ul=sum_ul/1;
     sum_dl=sum_dl/1;
     res_ul(i)=sum_ul;
-   res_dl(i)=sum_dl;
+    res_dl(i)=sum_dl;
 end
 h1=semilogy(snr,res_ul,'-o');
 
@@ -40,7 +40,7 @@ for i=1:length(snr)
     sum_ul=sum_ul/1;
     sum_dl=sum_dl/1;
     res_ul(i)=sum_ul;
-   res_dl(i)=sum_dl;
+    res_dl(i)=sum_dl;
 end
 h3=semilogy(snr,res_ul,'-^');
 
@@ -63,7 +63,7 @@ for i=1:length(snr)
     sum_ul=sum_ul/1;
     sum_dl=sum_dl/1;
     res_ul(i)=sum_ul;
-   res_dl(i)=sum_dl;
+    res_dl(i)=sum_dl;
 end
 h5=semilogy(snr,res_ul,'-s');
 
@@ -74,6 +74,7 @@ grid on;
 
 xlabel('SNR/dB');
 ylabel('MSE');
+legend([h1,h3,h5],'L=16','L=32','L=64');
 %DL
 %{  
 snr=-10:5:25;
