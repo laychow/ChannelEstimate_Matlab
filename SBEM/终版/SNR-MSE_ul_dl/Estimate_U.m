@@ -1,17 +1,17 @@
 function MSE=Estimate_U(L,sigma_p)
-d=1;    %ÌìÏß¼ä¸ô
-lambda=2;  %ÔØ²¨²¨³¤ 
-M=128; %ÌìÏßÊı
-P=100; %Â·¾¶Êı
-K=32;  %ÓÃ»§Êı
-z=pi/180;  %½Ç¶È×ª»¡¶È
+d=1;    %å¤©çº¿é—´éš”
+lambda=2;  %è½½æ³¢æ³¢é•¿ 
+M=128; %å¤©çº¿æ•°
+P=100; %è·¯å¾„æ•°
+K=32;  %ç”¨æˆ·æ•°
+z=pi/180;  %è§’åº¦è½¬å¼§åº¦
 tau=16;
 AS=4;
 G=ceil(K/tau);
 theta_Option=[-48.59,-14.48,14.48,48.59].*z;
 theta_AS=AS*z;
-OMEGA=tau/4;    %×éÖ®¼ä×îĞ¡¼ä¸ô
-sigma_n=2;
+OMEGA=tau/4;    %ç»„ä¹‹é—´æœ€å°é—´éš”
+sigma_n=1;
 rho=sigma_p/sigma_n;
 
 theta=zeros(P,K);
@@ -38,9 +38,9 @@ for k=1:K
 	end
 end
 
-%Éú³ÉĞÅµÀ
+%ç”Ÿæˆä¿¡é“
 %a_kp=(randn(K,P) + 1i*randn(K,P));
-a_kp=sqrt(1/2)*(randn(K,P) + 1i*randn(K,P)); %ĞÅµÀ¸´ÔöÒæ
+a_kp=sqrt(1/2)*(randn(K,P) + 1i*randn(K,P)); %ä¿¡é“å¤å¢ç›Š
 h_ul=zeros(M,1,K);
 
 for k=1:K
@@ -56,11 +56,11 @@ S_temp=orth(Ss_temp);
 S=S_temp(:,1:tau).*sqrt(L*sigma_p);
 
 
-if tau~=32                               %SBEM·½·¨
+if tau~=32                               %SBEMæ–¹æ³•
 
     h_es_pre=zeros(M,1,K);
 
-    %preamble Éú³ÉY
+    %preamble ç”ŸæˆY
 
     Y_pre=zeros(M,L,G);
     P_ut=L*rho;
@@ -88,13 +88,13 @@ if tau~=32                               %SBEM·½·¨
         end
     end
 
-    %»ñµÃ¿Õ¼äĞÅÏ¢
+    %è·å¾—ç©ºé—´ä¿¡æ¯
 
-    B_index=zeros(1,K);  %Ö»¼ÇÂ¼ÆğÊ¼Ë÷Òı[B_index~B_index+tau-1]
+    B_index=zeros(1,K);  %åªè®°å½•èµ·å§‹ç´¢å¼•[B_index~B_index+tau-1]
     b_index=zeros(1,K);
     h1=zeros(M,1,K);
-    h2=zeros(M,1,K);  %DFT ºóµÄh
-    V=100;  %É¨Ãè¾«¶È
+    h2=zeros(M,1,K);  %DFT åçš„h
+    V=100;  %æ‰«æç²¾åº¦
     %tau=16;
     phi=2*pi/(V*M);
     PHI=zeros(M,M,K);
@@ -138,8 +138,8 @@ if tau~=32                               %SBEM·½·¨
     
 
 
-    %%·Ö×é
-    B_index_grouped=zeros(3,K);%µÚÒ»ĞĞ±íÊ¾Ë÷Òı£¬µÚ¶şĞĞ±íÊ¾×éºÅ£¬µÚÈıĞĞ±íÊ¾ÓÃ»§ºÅ
+    %%åˆ†ç»„
+    B_index_grouped=zeros(3,K);%ç¬¬ä¸€è¡Œè¡¨ç¤ºç´¢å¼•ï¼Œç¬¬äºŒè¡Œè¡¨ç¤ºç»„å·ï¼Œç¬¬ä¸‰è¡Œè¡¨ç¤ºç”¨æˆ·å·
     B_index_grouped(1,1:K)=B_index; 
     B_index_grouped(2,1:K)=0; 
     for i=1:K
@@ -221,7 +221,7 @@ if tau~=32                               %SBEM·½·¨
         end
         
         
-        %UL¹À¼Æ
+        %ULä¼°è®¡
         y_g=zeros(M,1,Group_number);
         h_es_ul_temp=zeros(M,1,K);
         h_es_ul_tempp=zeros(M,1,K);
@@ -262,11 +262,11 @@ if tau~=32                               %SBEM·½·¨
                     Y_temp=Y_temp+sqrt(d_k)*h_ul(:,:,k);
                 end
             end
-            Y=Y+Y_temp*(S(1:L,g)');%%%%%¿ÉÄÜ·Ö×éÖ®ºóµÄ×Ü×éÊı±Ètau´ó£¬¾Í»á±¨´í
+            Y=Y+Y_temp*(S(1:L,g)');%%%%%å¯èƒ½åˆ†ç»„ä¹‹åçš„æ€»ç»„æ•°æ¯”tauå¤§ï¼Œå°±ä¼šæŠ¥é”™
         end
         Y=Y+sqrt(sigma_n/2)*(randn(M,L) + 1i*randn(M,L));
 
-        %%UL¹À¼Æ
+        %%ULä¼°è®¡
 
         y_g=zeros(M,1,Group_number);
         h_es_ul=zeros(M,1,K);
@@ -296,7 +296,7 @@ if tau~=32                               %SBEM·½·¨
 
 
 else
-    %%ÔÚBS¶Ë»ñµÃY
+    %%åœ¨BSç«¯è·å¾—Y
     Y=zeros(M,L);
     for k=1:K
         Y=Y+sqrt(d_k)*h_ul(:,:,k)*(S(:,k)');
@@ -304,7 +304,7 @@ else
     Y=Y+sqrt(sigma_n/2)*(randn(M,L) + 1i*randn(M,L));
     
     
-    %%UL¹À¼Æ
+    %%ULä¼°è®¡
     h_es_ul=zeros(M,1,K);
     for k=1:K
         h_es_ul(:,:,k)=(1/(sqrt(d_k)*(L*sigma_p)))*Y*S(:,k);
