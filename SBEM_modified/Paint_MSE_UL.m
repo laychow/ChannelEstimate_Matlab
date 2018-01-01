@@ -4,8 +4,86 @@ clc;
 %SNR-MSE
 %%dl
 
-RE=100 ;
+RE=5 ;
+tau_table=zeros(3,8);
 
+snr=-10:5:25;
+res_ul=zeros(1,length(snr));
+
+for i=1:length(snr)
+    sum_ul=0;
+    tau_final=0;
+   
+    for j=1:RE   %10times for average
+        [mse,tau]=Estimate_U_m(16,10^(snr(i)/10));
+        sum_ul=sum_ul+mse;
+        tau_final=tau_final+tau;
+      
+    end
+    sum_ul=sum_ul/RE;
+    tau_final=tau_final/RE;
+   
+    res_ul(i)=sum_ul;
+    tau_table(1,i)=tau_final;
+  
+end
+h1=semilogy(snr,res_ul,'-o','Color',[56/255 145/255 204/255]);
+
+hold on;
+
+grid on;
+
+snr=-10:5:25;
+res_ul=zeros(1,length(snr));
+for i=1:length(snr)
+    sum_ul=0;
+    tau_final=0;
+   
+    for j=1:RE   %10times for average
+        [mse,tau]=Estimate_U_m(32,10^(snr(i)/10));
+        sum_ul=sum_ul+mse;
+        tau_final=tau_final+tau;
+      
+    end
+    sum_ul=sum_ul/RE;
+    tau_final=tau_final/RE;
+   
+    res_ul(i)=sum_ul;
+    tau_table(2,i)=tau_final;
+  
+end
+h2=semilogy(snr,res_ul,'-^','Color',[241/255 194/255 81/255]);
+
+hold on;
+
+grid on;
+
+
+
+snr=-10:5:25;
+res_ul=zeros(1,length(snr));
+for i=1:length(snr)
+    sum_ul=0;
+    tau_final=0;
+   
+    for j=1:RE   %10times for average
+        [mse,tau]=Estimate_U_m(64,10^(snr(i)/10));
+        sum_ul=sum_ul+mse;
+        tau_final=tau_final+tau;
+      
+    end
+    sum_ul=sum_ul/RE;
+    tau_final=tau_final/RE;
+   
+    res_ul(i)=sum_ul;
+    tau_table(3,i)=tau_final;
+  
+end
+h3=semilogy(snr,res_ul,'-s','Color',[145/255 188/255 87/255]);
+
+hold on;
+
+grid on;
 
 snr=-10:5:25;
 res_ul=zeros(1,length(snr));
@@ -14,19 +92,39 @@ for i=1:length(snr)
     sum_ul=0;
    
     for j=1:RE   %10times for average
-        sum_ul=sum_ul+Estimate_U_m(64,10^(snr(i)/10));
+        sum_ul=sum_ul+Estimate_U(16,10^(snr(i)/10));
       
     end
     sum_ul=sum_ul/RE;
-   
+
     res_ul(i)=sum_ul;
-  
+
 end
-h1=semilogy(snr,res_ul,'-o','Color',[56/255 145/255 204/255]);
+h4=semilogy(snr,res_ul,'--o','Color',[56/255 145/255 204/255]);
 
 hold on;
 
+
 grid on;
+snr=-10:5:25;
+res_ul=zeros(1,length(snr));
+
+for i=1:length(snr)
+    sum_ul=0;
+   
+    for j=1:RE   %10times for average
+        sum_ul=sum_ul+Estimate_U(32,10^(snr(i)/10));
+      
+    end
+    sum_ul=sum_ul/RE;
+
+    res_ul(i)=sum_ul;
+
+end
+h5=semilogy(snr,res_ul,'--^','Color',[241/255 194/255 81/255]);
+
+hold on;
+
 
 snr=-10:5:25;
 res_ul=zeros(1,length(snr));
@@ -43,13 +141,9 @@ for i=1:length(snr)
     res_ul(i)=sum_ul;
 
 end
-h3=semilogy(snr,res_ul,'-^','Color',[241/255 194/255 81/255]);
+h6=semilogy(snr,res_ul,'--s','Color',[145/255 188/255 87/255]);
 
 hold on;
-
-
-grid on;
-
 %{
 snr=-10:5:25;
 res_ul=zeros(1,length(snr));
@@ -73,7 +167,7 @@ grid on;
 %}
 xlabel('SNR/dB');
 ylabel('MSE');
-legend([h1 h3],'modified','not modified');
+legend([h1 h2 h3],'L=16','L=32','L=64');
 %DL
 %{  
 snr=-10:5:25;
