@@ -1,6 +1,6 @@
 function MSE=Estimate_U(L,sigma_p)
 d=1;    %天线间隔
-lambda=2;  %载波波长 
+lambda=2;  %载波波长   Carrier frequency 2 GHz
 M=128; %天线数
 P=100; %路径数
 K=32;  %用户数

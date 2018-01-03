@@ -1,4 +1,4 @@
-function MSE=Estimate_U_m(L,sigma_p)
+function [MSE,tau_final]=Estimate_U_m(L,sigma_p)
 d=1;    %天线间隔
 lambda=2;  %载波波长 
 M=128; %天线数
@@ -56,7 +56,7 @@ end
 save h_ul.mat h_ul;
 
 tau_final=16;
-for tau=12:20
+for tau=12:16
     %disp(tau);
     S=zeros(L,tau);
     Ss_temp=rand(L,L);
@@ -166,7 +166,7 @@ for tau=12:20
    
 end
 save H_max.mat H_max;
-disp(tau_final);
+%disp(tau_final);
 
 G=ceil(K/tau_final);
 OMEGA=tau_final/4;    %组之间最小间隔
@@ -364,6 +364,7 @@ save a_theta.mat a_theta;
 save B_index.mat B_index;
 save phi_final.mat phi_final;
 save F.mat F;
+save tau_final.mat tau_final;
 
 
 

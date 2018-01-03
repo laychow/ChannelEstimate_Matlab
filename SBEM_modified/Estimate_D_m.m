@@ -1,12 +1,12 @@
 %来自作者的权威认证！！！
 %同一个cluster只累加一次，phi取平均
 
-function MSE=Estimate_D_test5(L,sigma_p)
+function MSE=Estimate_D_m(L,sigma_p)
 
 load ('a_theta.mat');
 load ('B_index.mat');
-%load ('S.mat');
-%load ('PHI_final.mat');
+
+load ('tau_final.mat');
 load ('phi_final.mat');
 load ('F.mat');
 
@@ -16,9 +16,10 @@ M=128; %天线数
 P=100; %路径数
 K=32;  %用户数
 
-tau=16;
+tau=tau_final;
 
 OMEGA=tau/4;
+
 %sigma_p=100;
 sigma_n=1;
 rho=sigma_p/sigma_n;
@@ -40,7 +41,7 @@ for k=1:K
 	h_dl(1:M,1,k)=(1/sqrt(P))*((b_kp(k,:)*a_theta(1:P,1:M,k)).');%%%%%%%
 	
 end
-save h_dl.mat h_dl;
+
 
 
 B_index_clu_grouped=zeros(3,K);%第一行是索引；第二行是组号；第三行是用户号
@@ -72,7 +73,7 @@ for g=1:K
     a=1;
     while mark+a<=K
     	if (B_index_clu_grouped(2,mark+a)==0)&&(B_index_clu_grouped(2,mark+a)~=g)
-	    	if (B_index_clu_grouped(1,mark+a)==B_index_clu_grouped(1,mark))||((B_index_clu_grouped(1,mark+a)-B_index_clu_grouped(1,mark))>=(tau+OMEGA-1))
+	    	if (B_index_clu_grouped(1,mark+a)==B_index_clu_grouped(1,mark))||(((B_index_clu_grouped(1,mark+a)-B_index_clu_grouped(1,mark))>=(tau+OMEGA-1))&&(B_index_clu_grouped(1,k_g)+M-B_index_clu_grouped(1,mark+a))>=(tau+OMEGA-1))
 	    		B_index_clu_grouped(2,mark+a)=g;
 	    		mark=mark+a;
 	    		a=1;
@@ -139,7 +140,14 @@ for i=1:K
     for k=1:K
         if (B_index_clu_grouped(2,k)==g)&&((k==i)||(B_index_clu_grouped(1,k)~=B_index_clu_grouped(1,i)))
             index_d=B_index_clu_grouped(1,k);
-            Y_temp=Y_temp+((F(index_d:index_d+tau-1,:)*PHI_final_new(:,:,k)*h_dl(:,:,i))')*S_k;
+            if (index_d<(M-tau+1))
+                Y_temp=Y_temp+((F(index_d:index_d+tau-1,:)*PHI_final_new(:,:,k)*h_dl(:,:,i))')*S_k;
+            else 
+                F_temp=zeros(tau,M);
+                F_temp(1:M-index_d+1,:)=F(index_d:M,:);
+                F_temp(M-index_d+2:tau,:)=F(1:index_d+tau-M-1,:);
+                Y_temp=Y_temp+((F_temp*PHI_final_new(:,:,k)*h_dl(:,:,i))')*S_k;
+            end    
         end
     end
     y_dl(:,:,i)=(Y_temp+sqrt(sigma_n/2)*(randn(1,L) + 1i*randn(1,L)))';
@@ -182,7 +190,12 @@ S_TEMP=pinv(S_k');
 for k=1:K
 	index_d=B_index_clu_grouped(1,k);
     h_es_dl_temp(:,:,k)=S_TEMP*y_dl(:,:,k);
-	h_es_dl_tempp(index_d:index_d+tau-1,:,k)=h_es_dl_temp(:,:,k);
+    if (index_d<(M-tau+1))
+        h_es_dl_tempp(index_d:index_d+tau-1,:,k)=h_es_dl_temp(:,:,k);
+    else
+        h_es_dl_tempp(index_d:M,:,k)=h_es_dl_temp(1:M-index_d+1,:,k);
+        h_es_dl_tempp(1:index_d+tau-M-1,:,k)=h_es_dl_temp(M-index_d+2:tau,:,k);
+    end
 	h_es_dl(:,:,k)=(PHI_final_new(:,:,k)')*(F')*h_es_dl_tempp(:,:,k);
    
 end
